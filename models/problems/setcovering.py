@@ -45,7 +45,8 @@ class SetCovering():
     j = 0  #Variable para recorrer solo la lista dentro de la lista, y no la lista completa#
     totalCasosIncorporados = 0 #Cuenta cuantos casos han sido incorporados a la lista. Solo para la última parte del txt. 3) # 
     filasConSusVecinos = [] #En posición 0 incluye total de vecinos, luego vecinos. Se repite este patrón en los otros casos que sigen en la lista pero empezando desde la último dato de las lista + 1#
-
+    posicionNuevoCaso = []
+    posicionNuevoCaso.append(j) #Se registra posición donde comienza otra iteración de 'filasConSusVecinos' #
     #Se leen numero de columnas y vecinos de fila#
     for i in lines:
         filasConSusVecinos.append(lines[contador]) 
@@ -61,6 +62,7 @@ class SetCovering():
 
         contador += 1
         j += 1
+        posicionNuevoCaso.append(j)
         if(contador >= len(lines)):
             break
 
@@ -72,7 +74,7 @@ class SetCovering():
     #print(costosColumnas)
     #print(filasConSusVecinos)
     #print("contador Final: " +str(contador) )
-
+    #print(posicionNuevoCaso)
           #FORMATO TXT#
 #El formato del .txt es el siguiente: #
 #1)Numero de filas y columnas.
