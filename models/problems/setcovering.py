@@ -1,9 +1,10 @@
 import logging
 from typing import Union
 import time
-#
-from abstract_problem import AbstractProblem
+
 import numpy as np
+
+from abstract_problem import AbstractProblem
 
 
 class SetCovering(AbstractProblem):
@@ -75,3 +76,4 @@ if __name__ == "__main__":
     logging.basicConfig(filename='reader.log', level='DEBUG')
     SetCovering("test_problem_file_scp.txt")
     # read_instance("scp2.txt")
+
