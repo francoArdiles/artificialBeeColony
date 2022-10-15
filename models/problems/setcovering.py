@@ -17,14 +17,13 @@ class SetCovering():
     #Se ve dimension de la matriz con los datos entregados#
     dimensionDeLaMatriz = lines[0].split()
     filas = dimensionDeLaMatriz[0]
-    filas = int(filas)
     columnas = dimensionDeLaMatriz[1]
     columnas = int(columnas)
-
+    filas = int(filas)
 
     ##Lineas de testing##
-    print("Filas: " + str(filas) )
-    print("Columnas: " + str(columnas) )
+    #print("Filas: " + str(filas) )
+    #print("Columnas: " + str(columnas) )
     ##Fin lineas de testing##
 
     costosColumnas = []
@@ -40,37 +39,41 @@ class SetCovering():
             contador = aux #Se guarda en contador el número de línea en que quedo la lectura del archivo#
             break 
 
-   #print(costosColumnas)
 
 
-
+    contador += 1 #Se suma uno a contador para mover puntero en archivo .txt#
     j = 0  #Variable para recorrer solo la lista dentro de la lista, y no la lista completa#
-    totalCasosIncorporados = 0 #Cuenta cuantos casos han sido incorporados a la lista. Para la última parte del txt. 3) # 
-    filasConSusVecinos = [] #En posición 0 incluye total de vecinos, luego vecinos. Se repite este patrón en los otros casos#
-    bufferDatos = []
+    totalCasosIncorporados = 0 #Cuenta cuantos casos han sido incorporados a la lista. Solo para la última parte del txt. 3) # 
+    filasConSusVecinos = [] #En posición 0 incluye total de vecinos, luego vecinos. Se repite este patrón en los otros casos que sigen en la lista pero empezando desde la último dato de las lista + 1#
+
     #Se leen numero de columnas y vecinos de fila#
     for i in lines:
-        bufferDatos.append(lines[contador+1]) 
-        totalVecinos = lines[contador+1]
-        print("TotalVecinos: " + totalVecinos)
-        print("Linea: " + str(contador+1))
+        filasConSusVecinos.append(lines[contador]) 
+        totalVecinos = lines[contador]
         totalCasosIncorporados += 1
         aux = 0
+        #Se leen todos los números que corresponden al caso que se está evaluando#
         while (aux < int(totalVecinos) ):  
             contador += 1
-            bufferDatos.append(lines[contador].split() )
-            aux += len(bufferDatos[j]) 
             j += 1
-            print("aux: " + str(aux) )
-            print("contador: " + str(contador) )
+            filasConSusVecinos.append(lines[contador].split() )
+            aux += len(filasConSusVecinos[j]) 
 
-        #Se tiene que agregar la lista de filas#
-        filasConSusVecinos.append(bufferDatos) 
+        contador += 1
         j += 1
-        #bufferDatos.clear()
+        if(contador >= len(lines)):
+            break
 
 
 
+
+    print("Descomenten las últimas líneas si quieren revisar que el código funciona: 72, 73 y 74")
+    #Si se quiere ver lista de listas y cuantas líneas se leyeron del .txt. Descomentar las siguientes 3 líneas#
+    #print(costosColumnas)
+    #print(filasConSusVecinos)
+    #print("contador Final: " +str(contador) )
+
+          #FORMATO TXT#
 #El formato del .txt es el siguiente: #
 #1)Numero de filas y columnas.
 #2)El costo de cada columna.
