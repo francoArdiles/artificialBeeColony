@@ -1,80 +1,77 @@
 import logging
-
-from .abstract_problem import AbstractProblem
+from typing import Union
+import time
+#
+from abstract_problem import AbstractProblem
 import numpy as np
 
-class SetCovering():
-    tallaFilas = 0
-    tallaColumnas = 0
-    contador = 0
-    aux = 0 
-    k = 0 
 
-    #Se abre archivo para test#
-    fo = open("scp2.txt", "r")
-    lines = fo.readlines()
+class SetCovering(AbstractProblem):
+    # TODO:
+    #  Implementar funciones de costos
+    #  Implementar restricciones
+    #  Implementar creación de soluciones aleatorias
+    #  Implementar funciones de penalización en caso de ser necesario
 
-    #Se ve dimension de la matriz con los datos entregados#
-    dimensionDeLaMatriz = lines[0].split()
-    filas = dimensionDeLaMatriz[0]
-    columnas = dimensionDeLaMatriz[1]
-    columnas = int(columnas)
-    filas = int(filas)
+    def __init__(self, filename: str) -> None:
+        super(SetCovering, self).__init__()
+        self.rows: Union[int, None] = None
+        self.columns: Union[int, None] = None
+        self.columns_vector: Union[list, None] = None
+        self.rows_vector: Union[list, None] = None
+        logging.info(f"leyendo archivo: {filename}")
+        logging.info('Midiendo tiempos de lectura de archivo')
+        start = time.time()
+        self.read_file(filename)
+        logging.info(f"{time.time() - start}")
+        self.dimensions = self.rows
 
-    ##Lineas de testing##
-    #print("Filas: " + str(filas) )
-    #print("Columnas: " + str(columnas) )
-    ##Fin lineas de testing##
+    def get_solution_fitness(self, solution):
+        pass
 
-    costosColumnas = []
-    #Se leen los costos por columna#
-    for i in lines:
-        if(i == lines[0]): #Por matriz ya inicializada se salta lectura de primera linea#
-            continue
-        cadena = i.split()
-        costosColumnas.append(cadena)
-        contador += len(costosColumnas[aux])
-        aux += 1
-        if(contador == columnas):
-            contador = aux #Se guarda en contador el número de línea en que quedo la lectura del archivo#
-            break 
+    def get_random_solution(self, rng=None):
+        pass
+
+    def is_solution(self, solution) -> bool:
+        pass
+
+    def read_file(self, filename: str = 'scp2.txt') -> None:
+        # logging.debug('Lectura de archivos')
+        with open(filename, "r") as f:
+            logging.debug('abriendo archivo de instancia')
+            # Genera una lista de valores numéricos
+            content = list(map(int, f.read().strip().split()))
+            self.rows = content.pop(0)
+            self.columns = content.pop(0)
+            logging.debug(f"filas: {self.rows}\tColumnas{self.columns}")
+        costs_vector, rows_data = content[0:self.columns], content[
+                                                           self.columns:]
+        self.columns_vector = np.array(costs_vector)
+        logging.debug(f'Columnas obtenidas: {len(costs_vector)}')
+
+        # Las filas tiene la siguiente estructuro
+
+        # primer valor(N) = cantidad de columnas asociadas
+        # siguientes N valores: idx de las columnas asociadas
+
+        # Esta lista debe tener largo "rows" al finalizar la iteración
+        rows_info = []
+        logging.debug(f'*' * 80)
+        logging.debug(f'Mostrando filas')
+        for i in range(self.rows):
+            # El primer valor indica la cantidad de vecinos
+            row_size = rows_data.pop(0)
+            logging.debug(rows_data[0:row_size])
+            # Los siguientes "row_size" valores son los vecinos
+            rows_info.append(rows_data[0:row_size])
+            rows_data = rows_data[row_size:]
+        # Se almacena la lista de vecinos en el objeto
+        self.rows_vector = rows_data
+        logging.debug(f'*' * 80)
+        logging.debug(f'filas encontradas: {len(rows_info)}')
 
 
-
-    contador += 1 #Se suma uno a contador para mover puntero en archivo .txt#
-    j = 0  #Variable para recorrer solo la lista dentro de la lista, y no la lista completa#
-    totalCasosIncorporados = 0 #Cuenta cuantos casos han sido incorporados a la lista. Solo para la última parte del txt. 3) # 
-    filasConSusVecinos = [] #En posición 0 incluye total de vecinos, luego vecinos. Se repite este patrón en los otros casos que sigen en la lista pero empezando desde la último dato de las lista + 1#
-
-    #Se leen numero de columnas y vecinos de fila#
-    for i in lines:
-        filasConSusVecinos.append(lines[contador]) 
-        totalVecinos = lines[contador]
-        totalCasosIncorporados += 1
-        aux = 0
-        #Se leen todos los números que corresponden al caso que se está evaluando#
-        while (aux < int(totalVecinos) ):  
-            contador += 1
-            j += 1
-            filasConSusVecinos.append(lines[contador].split() )
-            aux += len(filasConSusVecinos[j]) 
-
-        contador += 1
-        j += 1
-        if(contador >= len(lines)):
-            break
-
-
-
-
-    print("Descomenten las últimas líneas si quieren revisar que el código funciona: 72, 73 y 74")
-    #Si se quiere ver lista de listas y cuantas líneas se leyeron del .txt. Descomentar las siguientes 3 líneas#
-    #print(costosColumnas)
-    #print(filasConSusVecinos)
-    #print("contador Final: " +str(contador) )
-
-          #FORMATO TXT#
-#El formato del .txt es el siguiente: #
-#1)Numero de filas y columnas.
-#2)El costo de cada columna.
-#3)Por cada fila "i", el número de columnas que cubre la fila "i" seguido por la lista de columnas que cubren "i"
+if __name__ == "__main__":
+    logging.basicConfig(filename='reader.log', level='DEBUG')
+    SetCovering("test_problem_file_scp.txt")
+    # read_instance("scp2.txt")

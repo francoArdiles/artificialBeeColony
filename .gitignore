@@ -1,5 +1,11 @@
 # Project exclude paths
 /data/
 /notebooks/
+__pycache__/
+.idea/
+.vscode/
+venv/
 
 *.csv
+*.log
+*.pyc
