@@ -28,13 +28,33 @@ class SetCovering(AbstractProblem):
         self.dimensions = self.rows
 
     def get_solution_fitness(self, solution):
-        pass
+        cost = self.rows[0]
+        feasible = is_solution(self.rows[0], solution)
+        #Creo que el self.rows tiene que tener una variable para recorrerse
+        # en este caso no ? y esa se debería pasar por parametro de función ? #
+        if not feasible:
+            return inf
+        else:
+            fitness = np.dot(sol, cost)
+        
+        return fitness
+
 
     def get_random_solution(self, rng=None):
+
         pass
 
     def is_solution(self, solution) -> bool:
-        pass
+        flag = True
+        aux = np.dot(self.rows_vector[0"leer comentario"],solution)           # Multiplica la lista  de cobertura por la solucion
+        #Parece que en el self.rows_vector tenemos que pasarle a la funcion una variable que recorra el rows_vector no ? #
+
+        if 0 in aux:     #Si zona no esta cubierta entonces se entrega falso#             
+            flag = False
+
+        return flag, aux
+
+
 
     def read_file(self, filename: str = 'scp2.txt') -> None:
         # logging.debug('Lectura de archivos')
@@ -50,7 +70,7 @@ class SetCovering(AbstractProblem):
         self.columns_vector = np.array(costs_vector)
         logging.debug(f'Columnas obtenidas: {len(costs_vector)}')
 
-        # Las filas tiene la siguiente estructuro
+        # Las filas tienen la siguiente estructura
 
         # primer valor(N) = cantidad de columnas asociadas
         # siguientes N valores: idx de las columnas asociadas
