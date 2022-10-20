@@ -66,22 +66,45 @@ def binarization(solution: np.array, bin_type, alpha=None):
     rng = np.random.random(size=solution.size)
     if bin_type == 'standard':
         return np.array(rng <= solution, dtype=int)
-    elif bin_type == 'complement':
-        raise NotImplementedError('Binarización por complemento no '
-                                  'implementada.')
+   elif bin_type == 'complement':
+        """raise NotImplementedError('Binarización por complemento no '
+                                  'implementada.')"""
+        if(rng<=transfer function(d,j,w)){
+            return 1;
+        }
+        return 0;
     elif bin_type == 'static_probability':
-        assert alpha is not None
+        """assert alpha is not None
         raise NotImplementedError(
-            'Binarización de probabilidad estática no implementada'
-        )
+            
+        )"""
+        if(transfer function(d,j,w)<=a){
+           return0; 
+        }else{
+            if((a<transfer function(d,j,w)&&(transfer function(d,j,w)<=(1/2)*(1+a))){
+                return binarizar(j,w);
+            }
+        }else{
+            if(transfer function(d,j,w)>=(1/2)*(1+a))
+            return 1;
+        }
+        
     elif bin_type == 'elitist':
-        raise NotImplementedError(
+        """raise NotImplementedError(
             'Binarización por metodo elitista no implementado'
-        )
+        )"""
+        if(rand<transfer function(d,j,w)){
+            return(j,best);
+        }
+        return 0;
     elif bin_type == 'elitist_roulette':
-        raise NotImplementedError(
+        """raise NotImplementedError(
             'Binarización por metodo elitista no implementado'
-        )
+        )"""
+        if(a<transfer function(d,j,w)){
+            return
+        }
+        return       
     else:
         raise ValueError(
             f'Binarization method does not exists {bin_type}'
