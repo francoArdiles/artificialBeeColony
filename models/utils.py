@@ -1,8 +1,8 @@
 from typing import Iterable
-
+from math import erf
 import numpy as np
 
-V_SHAPE_INTEGRAL = 0
+V_SHAPE_ERF = 0
 V_SHAPE_TANH = 1
 V_SHAPE_SQRT = 2
 V_SHAPE_ARCTAN = 3
@@ -13,8 +13,8 @@ def s_shape(x: np.array, variable):
 
 
 def v_shape(x, v_shape_type):
-    if v_shape_type == V_SHAPE_INTEGRAL:
-        raise NotImplementedError('Función integral no implementada')
+    if v_shape_type == V_SHAPE_ERF:
+        return np.abs(np.array(list(map(lambda i: erf(i), x))))
     elif v_shape_type == V_SHAPE_TANH:
         return np.abs(np.tanh(x))
     elif v_shape_type == V_SHAPE_SQRT:
@@ -40,7 +40,7 @@ def transform(solution: np.array, transformation_type='CONTINUOUS',
         elif transfer_function == 'S_SHAPE_2D':
             value = s_shape(solution, -1/3)
         elif transfer_function == 'V_SHAPE_INTEGRAL':
-            value = v_shape(solution, V_SHAPE_INTEGRAL)
+            value = v_shape(solution, V_SHAPE_ERF)
         elif transfer_function == 'V_SHAPE_TANH':
             value = v_shape(solution, V_SHAPE_TANH)
         elif transfer_function == 'V_SHAPE_SQRT':
