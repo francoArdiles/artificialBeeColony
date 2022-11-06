@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Union
 from math import erf
 import numpy as np
 
@@ -24,8 +24,7 @@ def v_shape(x, v_shape_type):
 
 
 def transform(solution: np.array, transformation_type='CONTINUOUS',
-              transfer_function='2SHAPE_2D', binarization_method='STANDARD',
-              alpha=None):
+              transfer_function='2SHAPE_2D', **kwargs):
 
     if transformation_type == 'CONTINUOUS':
         return solution
@@ -50,8 +49,7 @@ def transform(solution: np.array, transformation_type='CONTINUOUS',
         else:
             raise ValueError(f'Selected transfer method does not exist: '
                              f'{transfer_function}')
-        return binarization(value, binarization_method, alpha)
-
+        return value
     elif transformation_type == 'DISCRETE':
         raise NotImplementedError(
             'There is not discretization methods implemented'
@@ -62,49 +60,39 @@ def transform(solution: np.array, transformation_type='CONTINUOUS',
         )
 
 
-def binarization(solution: np.array, bin_type, alpha=None):
+def binarize(solution: np.array,
+             bin_type: str,
+             alpha: Union[float, None] = None,
+             original_solution: Union[np.array, None] = None,
+             best_solution: Union[np.array, None] = None,
+             **kwargs):
     rng = np.random.random(size=solution.size)
+    new_solution = np.copy(solution)
     if bin_type == 'standard':
         return np.array(rng <= solution, dtype=int)
-   elif bin_type == 'complement':
-        """raise NotImplementedError('Binarización por complemento no '
-                                  'implementada.')"""
-        if(rng<=transfer function(d,j,w)){
-            return 1;
-        }
-        return 0;
+    elif bin_type == 'complement':
+        idx = np.where(new_solution[rng <= new_solution])
+        new_solution[idx] = abs(original_solution[idx] -1)
+        mask = np.ones(new_solution.size, dtype=bool)
+        mask[idx] = False
+        new_solution[mask] = 0
+        return new_solution
     elif bin_type == 'static_probability':
-        """assert alpha is not None
-        raise NotImplementedError(
-            
-        )"""
-        if(transfer function(d,j,w)<=a){
-           return0; 
-        }else{
-            if((a<transfer function(d,j,w)&&(transfer function(d,j,w)<=(1/2)*(1+a))){
-                return binarizar(j,w);
-            }
-        }else{
-            if(transfer function(d,j,w)>=(1/2)*(1+a))
-            return 1;
-        }
-        
+        assert alpha is not None
+        assert best_solution is not None
+        new_solution[new_solution <= alpha] = 0
+        new_solution[new_solution >= (1 + alpha)/2 ] = 1
+        idx = np.where(np.logical_and(new_solution > alpha, new_solution <= (1 + alph)/2))
+        new_solution[idx] = original_solution[idx]
+        return new_solution
     elif bin_type == 'elitist':
-        """raise NotImplementedError(
-            'Binarización por metodo elitista no implementado'
-        )"""
-        if(rand<transfer function(d,j,w)){
-            return(j,best);
-        }
-        return 0;
+        new_solution[rng < new_solution] = best_solution[rng < new_solution]
+        new_solution[rng >= new_solution] = 0
+        return new_solution
     elif bin_type == 'elitist_roulette':
-        """raise NotImplementedError(
+        raise NotImplementedError(
             'Binarización por metodo elitista no implementado'
-        )"""
-        if(a<transfer function(d,j,w)){
-            return
-        }
-        return       
+        )
     else:
         raise ValueError(
             f'Binarization method does not exists {bin_type}'

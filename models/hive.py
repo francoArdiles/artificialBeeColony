@@ -1,3 +1,8 @@
+"""
+Módulo encargado de la ejecución de búsquedas utilizando la metaheurística de
+Artificial Bee Colony
+"""
+
 import logging
 import random
 from datetime import datetime
@@ -5,13 +10,15 @@ from datetime import datetime
 import numpy as np
 
 from .logger import log_fitness_table, log_hive_detail
-from .utils import transform
+from .utils import transform, binarize
 
 from .problems import AbstractProblem
 
 
 class MatrixHive:
-
+    """
+    Clase que contiene la colmena
+    """
     def __init__(self, problem, colony_size, max_trials: int = 5,
                  iterations=10, maximization=False,
                  problem_type='CONTINUOUS', transfer_function='S_SHAPE_2D',
@@ -28,7 +35,7 @@ class MatrixHive:
         self.best_bee = None
         self.best_fitness = -np.inf if maximization else np.inf
 
-        # search elementws
+        # search elements
         self.iterations = iterations
         self.max_trials = max_trials
         self.trials = np.zeros([self.colony_size])
@@ -40,7 +47,9 @@ class MatrixHive:
             'transformation_type': problem_type,
             'transfer_function': transfer_function,
             'binarization_method': binarization_method,
-            'alpha': None
+            'alpha': alpha,
+            'original_solution': None,
+            'best_solution': None,
         }
 
         log_hive_detail({
@@ -60,7 +69,7 @@ class MatrixHive:
         while counter < self.iterations:
             logging.debug('sending employees')
             self.send_employees()
-            logging.debug('sending outlookers')
+            logging.debug('sending outlooks')
             self.send_onlookers()
             logging.debug('sending scouts')
             self.global_fitness()
@@ -74,7 +83,7 @@ class MatrixHive:
         logging.info(f'best solution found: {self.best_bee}')
         logging.info(f'fitness: {self.best_fitness}')
 
-    def initialize(self):
+    def initialize(self) -> None:
         """
         Inicializa la colmena, creando abejas aleatorias y registrando su
         fitness
@@ -91,21 +100,33 @@ class MatrixHive:
         self.bees = np.array(hive)
         self.fitness = np.array(fitness)
 
-    def send_employees(self):
+    def send_employees(self) -> None:
+        """
+        Ejecuta interacción de abejas obreras
+
+        :return: None
+        """
         for bee in self.index_array:
-            # logging.debug(f'bee: {bee}')
             self.move_bee(bee)
 
     def send_onlookers(self):
+        """
+        Ejecuta iteración de abejas en espera
+
+        :return: None
+        """
         probability_vector = self.fitness / sum(self.fitness)
         for bee in self.index_array:
-            # logging.debug(f'bee: {bee}')
             self.move_bee(bee, employee=False,
                           probability_vector=probability_vector)
 
-    def send_scouts(self):
+    def send_scouts(self) -> None:
+        """
+        Ejecuta iteración de abejas exploradoras.
+
+        :return:
+        """
         stale_source = np.where(self.trials > self.max_trials)[0]
-        # logging.debug(f'stale sources: {stale_source}')
         for bee in stale_source:
             new_source = self.problem.get_random_solution()
             self.bees[bee] = new_source
@@ -118,12 +139,10 @@ class MatrixHive:
 
     def pick_roulette(self, bee: int, probability_vector: np.array):
         """
-        Selecciona un vecino basado en un vector de probabilidades
-
-        :param bee: Indice de la abeja en la colmena
-        :param probability_vector: Vector de probabilidades basado en fitness
-
-        :return: Solución vecina encontrada
+        Selecciona un vecino basado en un vector de probabilidades.
+        :param bee: Índice de la abeja en la colmena.
+        :param probability_vector: Vector de probabilidades basado en fitness.
+        :return: Solución vecina encontrada.
         """
         new_source = np.random.choice(self.index_array, p=probability_vector)
         while new_source == bee:
@@ -131,12 +150,11 @@ class MatrixHive:
                                           p=probability_vector)
         return new_source
 
-    def pick_random_neighbor(self, bee: int):
+    def pick_random_neighbor(self, bee: int) -> np.array:
         """
-        Elige un vecino de la colmena de manera aleatoria
-        :param bee: Índice de la abeja en la colmena
-
-        :return: Solución vecina encontrada
+        Elige un vecino de la colmena de manera aleatoria.
+        :param bee: Índice de la abeja en la colmena.
+        :return: Solución vecina encontrada.
         """
         neighbor = random.randint(0, self.colony_size - 1)
         while neighbor == bee:
@@ -149,12 +167,11 @@ class MatrixHive:
 
     def pick_new_fitness(self, old_fitness: float, new_fitness: float) -> bool:
         """
-        Indica si el nuevo fitness es mejor al registrado anteriormente
-
-        :param old_fitness: Fitness de solución conocida
-        :param new_fitness: Fitness de nueva solución
+        Indica si el nuevo fitness es mejor al registrado anteriormente.
+        :param old_fitness: Fitness de solución conocida.
+        :param new_fitness: Fitness de nueva solución.
         :return: True si la nueva solución es mejor que la actual. False,
-        en caso contrario
+        en caso contrario.
         """
         if self.maximization:
             return new_fitness > old_fitness
@@ -164,11 +181,11 @@ class MatrixHive:
                      employee: bool = True,
                      probability_vector: np.array = None) -> int:
         """
-        Método encargado de retornar un vecino para una abeja dada
-        :param bee: Índice de la abeja en la colmena
-        :param employee: Indica si la abeja es obrera
-        :param probability_vector: Vector de probabilidades para la colmena
-        :return: Índice del vecino encontrado
+        Método encargado de retornar un vecino para una abeja dada.
+        :param bee: Índice de la abeja en la colmena.
+        :param employee: Indica si la abeja es obrera.
+        :param probability_vector: Vector de probabilidades para la colmena.
+        :return: Índice del vecino encontrado.
         """
         if employee:
             neighbor = self.pick_random_neighbor(bee)
@@ -179,11 +196,12 @@ class MatrixHive:
     def move_bee(self, bee: int, employee: bool = True,
                  probability_vector: np.array = None) -> np.array:
         """
+        Realiza el movimiento de una abeja
 
-        :param bee: Abeja que se moverá
-        :param employee: Indica si la abeja es obrera
-        :param probability_vector: Vector de probabilidades para la colmena
-        :return: Tupla con la solución generada, y el fitness de la solución
+        :param bee: Abeja que se moverá.
+        :param employee: Indica si la abeja es obrera.
+        :param probability_vector: Vector de probabilidades para la colmena.
+        :return: Tuple con la solución generada, y el fitness de la solución
         """
         neighbor = self.get_neighbor(bee, employee, probability_vector)
         updated_bee = self.perform_movement(bee, neighbor)
@@ -193,7 +211,6 @@ class MatrixHive:
         while not self.problem.is_solution(updated_bee):
             neighbor = self.get_neighbor(bee, employee, probability_vector)
             self.perform_movement(bee, neighbor)
-        # logging.debug(f'neighbor picked {neighbor}')
 
         fitness = self.problem.get_solution_fitness(updated_bee)
 
@@ -226,14 +243,11 @@ class MatrixHive:
 
     def perform_movement(self, bee: int, neighbor: int) -> np.array:
         """
-        Genera la nueva solución a partir de una abeja y su vecina
-        :param bee: Índice de la abeja en la colmena
-        :param neighbor: Índice de la abeja vecina en la colmena
-        :return: Nueva solución generada por la función de movimiento
+        Genera la nueva solución a partir de una abeja y su vecina.
+        :param bee: Índice de la abeja en la colmena.
+        :param neighbor: Índice de la abeja vecina en la colmena.
+        :return: Nueva solución generada por la función de movimiento.
         """
-        # X'_ij + phi * ( X_ij - Y_ij )
-        # logging.debug(f'mixing: {bee} and {neighbor}')
-        # logging.debug(f'{self.bees[bee]} - {self.bees[neighbor]}')
 
         phi = np.random.sample(size=self.problem.dimensions)
         difference = self.bees[bee] - self.bees[neighbor]
@@ -242,8 +256,25 @@ class MatrixHive:
 
         delta = np.multiply(phi, difference)
         updated_bee += delta
+        self.transformation_kwargs['original_solution'] = self.bees[bee]
+        self.transformation_kwargs['best_solution'] = self.best_bee
 
-        updated_bee = transform(updated_bee, **self.transformation_kwargs)
+        updated_bee = self.get_solution(updated_bee)
         return updated_bee
 
+    def get_solution(self, updated_bee: np.array) -> np.array:
+        """
+        Realiza la transformación al movimiento de una abeja en caso de ser
+        necesario.
+        :param updated_bee: Arregla de la abeja en su nueva posición.
+        :return: Valor actualizado de la abeja
+        """
 
+        t_type = self.transformation_kwargs.get('transformation_type')
+        if t_type == 'CONTINUOUS':
+            return updated_bee
+        transformed = transform(updated_bee, **self.transformation_kwargs)
+        if t_type == 'BINARY':
+            return binarize(transformed, **self.transformation_kwargs)
+        elif t_type == 'DISCRETE':
+            return transformed
