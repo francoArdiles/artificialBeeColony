@@ -65,31 +65,58 @@ def binarize(solution: np.array,
              alpha: Union[float, None] = None,
              original_solution: Union[np.array, None] = None,
              best_solution: Union[np.array, None] = None,
+             rng=None,
              **kwargs):
-    rng = np.random.random(size=solution.size)
+    """
+    Binariza una solución transformada.
+    :param solution: Solución transformada.
+    :param bin_type: Tipo de binarización.
+    :param alpha: valor de probabilidad estática.
+    :param original_solution: solucion que genera la actual.
+    :param best_solution: mejor solucion conocida.
+    :param rng: generador de valores aleatorios.
+    :param kwargs:
+    :return: Solución binarizada.
+    """
+    bin_type = bin_type.upper()
+    if not rng:
+        rnd_vector = np.random.random(size=solution.size)
+    else:
+        rnd_vector = rng.random(size=solution.size)
     new_solution = np.copy(solution)
-    if bin_type == 'standard':
-        return np.array(rng <= solution, dtype=int)
-    elif bin_type == 'complement':
-        idx = np.where(new_solution[rng <= new_solution])
-        new_solution[idx] = abs(original_solution[idx] -1)
+    if bin_type == 'STANDARD':
+        return np.array(rnd_vector <= solution, dtype=int)
+    elif bin_type == 'COMPLEMENT':
+        # idx = np.where(new_solution[rng <= new_solution])
+        # new_solution[idx] = abs(original_solution[idx] - 1)
+        new_solution[rnd_vector <= new_solution] = abs(
+            original_solution[rnd_vector <= new_solution] - 1)
         mask = np.ones(new_solution.size, dtype=bool)
-        mask[idx] = False
+        mask[rnd_vector <= new_solution] = False
         new_solution[mask] = 0
         return new_solution
-    elif bin_type == 'static_probability':
+    elif bin_type == 'STATIC_PROBABILITY':
         assert alpha is not None
         assert best_solution is not None
         new_solution[new_solution <= alpha] = 0
-        new_solution[new_solution >= (1 + alpha)/2 ] = 1
-        idx = np.where(np.logical_and(new_solution > alpha, new_solution <= (1 + alph)/2))
-        new_solution[idx] = original_solution[idx]
+        new_solution[new_solution >= (1 + alpha)/2] = 1
+        idx = np.where(np.logical_and(new_solution > alpha, new_solution <= (
+                1 + alpha)/2))
+
+        new_solution[
+            np.logical_and(
+                new_solution > alpha,
+                new_solution <= (1 + alpha)/2)
+        ] = original_solution[np.logical_and(new_solution > alpha,
+                                             new_solution <= (1 + alpha)/2)]
+        # new_solution[idx] = original_solution[idx]
         return new_solution
-    elif bin_type == 'elitist':
-        new_solution[rng < new_solution] = best_solution[rng < new_solution]
-        new_solution[rng >= new_solution] = 0
+    elif bin_type == 'ELITIST':
+        new_solution[rnd_vector < new_solution] = best_solution[rnd_vector <
+                                                                new_solution]
+        new_solution[rnd_vector >= new_solution] = 0
         return new_solution
-    elif bin_type == 'elitist_roulette':
+    elif bin_type == 'ELITIST_ROULETTE':
         raise NotImplementedError(
             'Binarización por metodo elitista no implementado'
         )
