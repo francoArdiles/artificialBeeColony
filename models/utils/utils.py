@@ -32,11 +32,11 @@ def transform(solution: np.array, transformation_type='CONTINUOUS',
         if transfer_function == 'S_SHAPE_2D':
             value = s_shape(solution, -2)
             pass
-        elif transfer_function == 'S_SHAPE_D/2':
+        elif transfer_function == 'S_SHAPE_D':
             value = s_shape(solution, -1)
-        elif transfer_function == 'S_SHAPE_2D/3':
+        elif transfer_function == 'S_SHAPE_D/2':
             value = s_shape(solution, -1/2)
-        elif transfer_function == 'S_SHAPE_2D':
+        elif transfer_function == 'S_SHAPE_D/3':
             value = s_shape(solution, -1/3)
         elif transfer_function == 'V_SHAPE_INTEGRAL':
             value = v_shape(solution, V_SHAPE_ERF)
