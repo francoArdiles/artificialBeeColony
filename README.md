@@ -9,3 +9,6 @@ Implementation of Artificial Bee Colony in python 3.9
 
 
 3)ejecución del programa: python3 main.py
+
+
+PD: PDF y shell script están demas para ejecutar el programa. Son las utilidades que se realizaron para instanciar la investigación usando IRACE
